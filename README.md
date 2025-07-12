@@ -1,26 +1,41 @@
-# Welcome to your Lovable project
+# GullyKart Vision
 
-## Project info
+## 🔍 Project Info
 
-**URL**: https://lovable.dev/projects/a3067759-05e5-4e51-bb47-e6f2e0f9de65
+**Live URL**: https://gullykart.dev (update this with your custom domain or deployed URL)
 
-## How can I edit this code?
+GullyKart Vision is a web-based platform designed to forecast hyperlocal fashion trends and assist sellers in creating AI-powered marketing campaigns — personalized for their audience.
 
-There are several ways of editing your application.
+## 💻 Tech Stack
 
-**Use Lovable**
+This project is built using:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a3067759-05e5-4e51-bb47-e6f2e0f9de65) and start prompting.
+- **React**
+- **TypeScript**
+- **Vite**
+- **Tailwind CSS**
+- **shadcn/ui** component library
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Getting Started (Local Development)
 
-**Use your preferred IDE**
+To run this project locally:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites:
+- [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed (preferably via [nvm](https://github.com/nvm-sh/nvm))
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Steps:
+```bash
+# Step 1: Clone the repository
+git clone https://github.com/Ishavashisht/gullykart.git
 
-Follow these steps:
+# Step 2: Navigate into the project directory
+cd gullykart
+
+# Step 3: Install dependencies
+npm install
+
+# Step 4: Start the development server
+npm run dev
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
@@ -49,6 +64,13 @@ npm run dev
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
+** To deploy this project:
+
+-Use Vercel, Netlify, or GitHub Pages
+
+-Or host it on your own domain/server
+
+-Coming soon: Docker + CI pipeline instructions
 
 ## What technologies are used for this project?
 
@@ -60,14 +82,4 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/a3067759-05e5-4e51-bb47-e6f2e0f9de65) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
