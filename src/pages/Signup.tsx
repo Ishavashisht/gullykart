@@ -11,6 +11,11 @@ import { toast } from "sonner";
 import { EmailService } from "@/services/emailService";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 
+// Make EmailService available for debugging in development
+if (import.meta.env.DEV) {
+  (window as any).EmailService = EmailService;
+}
+
 const Signup = () => {
   const navigate = useNavigate();
   const { signInWithGoogle, isLoading: googleLoading } = useGoogleAuth();
@@ -20,18 +25,10 @@ const Signup = () => {
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
 
-  // Send OTP via master Gmail using EmailService
+  // Send OTP via Gmail using EmailService
   const sendOTP = async (userEmail: string, userName?: string) => {
     setIsLoading(true);
     try {
-      // First, test email connection
-      console.log('Testing email connection...');
-      const connectionTest = await EmailService.testEmailConnection();
-      
-      if (!connectionTest) {
-        console.warn('Email connection test failed, but proceeding anyway...');
-      }
-
       const result = await EmailService.sendOTP(userEmail, userName);
       
       if (result.success) {

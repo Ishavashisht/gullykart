@@ -2,9 +2,9 @@
 // This service communicates with the Express backend for actual email sending
 
 // Backend API configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// For demo purposes, we'll keep a local fallback but prefer backend
+// Local storage for development/testing purposes
 const otpStore = new Map<string, { otp: string; expiresAt: number }>();
 
 export class EmailService {
@@ -40,13 +40,14 @@ export class EmailService {
   }
 
   // Send OTP via backend API
-  static async sendOTP(to: string, name?: string): Promise<{ success: boolean; message: string }> {
+  static async sendOTP(to: string, name?: string): Promise<{ success: boolean; message: string; otp?: string }> {
     try {
       console.log('=== SENDING OTP EMAIL VIA BACKEND ===');
       console.log(`To: ${to}`);
       console.log(`Name: ${name || 'Unknown'}`);
+      console.log(`API URL: ${API_BASE_URL}`);
 
-      // Try to send via backend API first
+      // Send via backend API
       const response = await fetch(`${API_BASE_URL}/send-otp`, {
         method: 'POST',
         headers: {
@@ -63,46 +64,18 @@ export class EmailService {
           message: result.message || `OTP sent successfully to ${to}`,
         };
       } else {
-        // Backend failed, fall back to demo mode
-        console.warn('❌ Backend failed, falling back to demo mode');
-        return await this.sendOTPFallback(to, name);
+        const errorResult = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('❌ Backend failed:', errorResult);
+        return {
+          success: false,
+          message: errorResult.message || 'Failed to send OTP. Please try again.',
+        };
       }
     } catch (error) {
-      console.error('Backend API error, falling back to demo mode:', error);
-      // Fall back to demo mode if backend is not available
-      return await this.sendOTPFallback(to, name);
-    }
-  }
-
-  // Fallback demo mode (when backend is not available)
-  private static async sendOTPFallback(to: string, name?: string): Promise<{ success: boolean; message: string }> {
-    try {
-      const otp = this.generateOTP();
-      this.storeOTP(to, otp);
-
-      console.log('=== DEMO MODE: OTP EMAIL ===');
-      console.log(`To: ${to}`);
-      console.log(`Name: ${name || 'Unknown'}`);
-      console.log(`OTP: ${otp}`);
-      console.log('============================');
-
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Show OTP in alert for demo (remove in production)
-      setTimeout(() => {
-        alert(`🎉 Demo Mode: Your OTP is ${otp}\n\nTo enable real email sending:\n1. Start the backend: npm run dev:backend\n2. Check backend/.env for Gmail credentials`);
-      }, 500);
-
-      return {
-        success: true,
-        message: `OTP generated successfully! (Demo mode - check alert)`,
-      };
-    } catch (error) {
-      console.error('Failed to send OTP (demo mode):', error);
+      console.error('❌ Backend API error:', error);
       return {
         success: false,
-        message: 'Failed to generate OTP. Please try again.',
+        message: 'Unable to connect to email service. Please check your internet connection and try again.',
       };
     }
   }
@@ -239,7 +212,25 @@ export class EmailService {
     }
   }
 
-  // Verify OTP via backend API with fallback to local storage
+  // Test connectivity to backend (for debugging)
+  static async testConnectivity(): Promise<void> {
+    console.log('🔍 Testing backend connectivity...');
+    console.log(`API Base URL: ${API_BASE_URL}`);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL.replace('/api', '')}/health`);
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Backend connectivity test passed:', result);
+      } else {
+        console.error('❌ Backend responded with error:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Backend connectivity test failed:', error);
+    }
+  }
+
+  // Verify OTP via backend API
   static async verifyOTPAsync(email: string, inputOTP: string): Promise<boolean> {
     try {
       // Try backend API first
@@ -256,12 +247,12 @@ export class EmailService {
         console.log('✅ OTP verified via backend:', result);
         return result.success;
       } else {
-        console.warn('❌ Backend verification failed, using local fallback');
-        return this.verifyOTP(email, inputOTP);
+        console.warn('❌ Backend verification failed');
+        return false;
       }
     } catch (error) {
-      console.error('Backend verification error, using local fallback:', error);
-      return this.verifyOTP(email, inputOTP);
+      console.error('❌ Backend verification error:', error);
+      return false;
     }
   }
 }
