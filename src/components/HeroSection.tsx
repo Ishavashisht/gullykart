@@ -1,11 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Zap, MessageSquare } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
-
 
 const HeroSection = () => {
-  const navigate = useNavigate();
   return (
     <section className="relative min-h-[90vh] overflow-hidden">
       {/* Gradient Background */}
@@ -37,14 +33,12 @@ const HeroSection = () => {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
-  onClick={() => navigate("/trends")}
-  size="lg" 
-  variant="secondary"
-  className="text-lg px-8 py-6 font-semibold bg-secondary hover:bg-secondary/90 transform hover:scale-105 transition-all duration-300"
->
-  Start Forecasting Now
-</Button>
-
+                size="lg" 
+                variant="secondary"
+                className="text-lg px-8 py-6 font-semibold bg-secondary hover:bg-secondary/90 transform hover:scale-105 transition-all duration-300"
+              >
+                Start Forecasting Now
+              </Button>
             </div>
           </div>
 
