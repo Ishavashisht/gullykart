@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:backend": "cd backend && npm run dev",
-    "dev:both": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"blue,green\" \"npm run dev\" \"npm run dev:backend\"",
+    "dev:both": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run dev:backend\" \"npm run dev\"",
     "dev:ordered": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"green,blue\" \"npm run dev:backend\" \"sleep 3 && npm run dev\"",
     "build": "vite build",
     "build:dev": "vite build --mode development",
