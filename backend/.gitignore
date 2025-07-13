@@ -1,4 +1,7 @@
+# Environment files
 .env
+
+# Python
 venv/
 __pycache__/
 *.pyc
@@ -16,7 +19,6 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git
 .mypy_cache
 .pytest_cache
 .hypothesis
