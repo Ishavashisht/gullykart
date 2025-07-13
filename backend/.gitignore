@@ -1,8 +1,15 @@
 # Environment files
 .env
 
-# Python
+
+# Virtual environments
 venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
