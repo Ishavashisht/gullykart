@@ -2,7 +2,7 @@
 
 ## 🔍 Project Info
 
-**Live URL**: http://localhost:8080/ (update this with your custom domain or deployed URL)
+**Live URL**: http://localhost:8000/ (update this with your custom domain or deployed URL)
 
 GullyKart Vision is a web-based platform designed to forecast hyperlocal fashion trends and assist sellers in creating AI-powered marketing campaigns — personalized for their audience.
 

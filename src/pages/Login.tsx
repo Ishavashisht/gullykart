@@ -5,18 +5,44 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Phone, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
     // Simulate login process
-    setTimeout(() => {
+    try {
+      // In a real app, this would validate credentials against backend
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('Login successful! Welcome back.');
+      navigate('/'); // Redirect to homepage
+    } catch (error) {
+      toast.error('Login failed. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      // Simulate Google login
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('Google login successful! Welcome back.');
+      navigate('/'); // Redirect to homepage
+    } catch (error) {
+      toast.error('Google login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -131,6 +157,8 @@ const Login = () => {
                 variant="outline"
                 className="w-full bg-background/50 hover:bg-accent"
                 type="button"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
@@ -150,7 +178,7 @@ const Login = () => {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign in with Google
+                {isLoading ? "Signing in..." : "Sign in with Google"}
               </Button>
 
               <div className="text-center text-sm text-muted-foreground">

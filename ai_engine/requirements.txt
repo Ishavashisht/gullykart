@@ -1,0 +1,5 @@
+huggingface_hub
+requests
+Pillow
+python-dotenv
+google-generativeai

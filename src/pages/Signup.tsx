@@ -24,6 +24,14 @@ const Signup = () => {
   const sendOTP = async (userEmail: string, userName?: string) => {
     setIsLoading(true);
     try {
+      // First, test email connection
+      console.log('Testing email connection...');
+      const connectionTest = await EmailService.testEmailConnection();
+      
+      if (!connectionTest) {
+        console.warn('Email connection test failed, but proceeding anyway...');
+      }
+
       const result = await EmailService.sendOTP(userEmail, userName);
       
       if (result.success) {
@@ -34,6 +42,7 @@ const Signup = () => {
         toast.error(result.message);
       }
     } catch (error) {
+      console.error('Send OTP error:', error);
       toast.error('Failed to send OTP. Please try again.');
     } finally {
       setIsLoading(false);
@@ -71,16 +80,16 @@ const Signup = () => {
 
     setIsLoading(true);
     try {
-      // Verify OTP using EmailService
-      const isValid = EmailService.verifyOTP(email, otp);
+      // Verify OTP using EmailService (tries backend first, falls back to local)
+      const isValid = await EmailService.verifyOTPAsync(email, otp);
       
       if (isValid) {
         setStep('success');
         toast.success('Account created successfully!');
         
-        // Redirect to dashboard after 2 seconds
+        // Redirect to homepage after 2 seconds
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/');
         }, 2000);
       } else {
         toast.error('Invalid or expired OTP. Please try again.');
@@ -98,7 +107,7 @@ const Signup = () => {
       const user = await signInWithGoogle();
       if (user) {
         toast.success(`Welcome, ${user.name}! Account created successfully.`);
-        navigate('/dashboard');
+        navigate('/');
       }
     } catch (error) {
       toast.error('Google signup failed. Please try again.');
@@ -111,6 +120,26 @@ const Signup = () => {
     }
   };
 
+  // Test email function for development
+  const testEmail = async () => {
+    try {
+      const testResult = await EmailService.testEmailConnection();
+      if (testResult) {
+        toast.success('✅ Gmail connection successful!');
+        // Send a test OTP to your own email
+        const result = await EmailService.sendOTP('arunpatwa.iit@gmail.com', 'Test User');
+        if (result.success) {
+          toast.success('Test email sent to arunpatwa.iit@gmail.com');
+        }
+      } else {
+        toast.error('❌ Gmail connection failed');
+      }
+    } catch (error) {
+      toast.error('Email test failed');
+      console.error(error);
+    }
+  };
+
   if (step === 'success') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center p-4">
@@ -120,7 +149,7 @@ const Signup = () => {
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold">Welcome to GullyKart!</h2>
               <p className="text-muted-foreground">
-                Your account has been created successfully. Redirecting to dashboard...
+                Your account has been created successfully. Redirecting to homepage...
               </p>
             </div>
           </CardContent>
@@ -139,6 +168,20 @@ const Signup = () => {
         </Link>
 
         <Card className="backdrop-blur-sm bg-card/95 border-primary-foreground/10">
+          {/* Development Test Button */}
+          {import.meta.env.DEV && (
+            <div className="p-4 border-b border-primary-foreground/10">
+              <Button
+                onClick={testEmail}
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+              >
+                🧪 Test Email Connection (Dev Only)
+              </Button>
+            </div>
+          )}
+          
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Join GullyKart Vision

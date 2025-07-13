@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Trends from "./pages/Trends";
 import FestivalInsightPage from "./pages/FestivalInsightPage";
+import EmailTester from "./components/EmailTester";
+import DebugPage from "./pages/DebugPage";
 
 import CampaignGenerator from "./pages/CampaignGenerator";
 import Dashboard from "./pages/Dashboard";
@@ -29,6 +31,15 @@ const App = () => (
           
           <Route path="/campaigns" element={<CampaignGenerator />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Development only routes */}
+          {import.meta.env.DEV && (
+            <>
+              <Route path="/test-email" element={<EmailTester />} />
+              <Route path="/debug" element={<DebugPage />} />
+            </>
+          )}
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="/insights/:festival" element={<FestivalInsightPage />} />
 
