@@ -92,8 +92,6 @@ def generate_kit(payload: CampaignRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Run the server
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
-

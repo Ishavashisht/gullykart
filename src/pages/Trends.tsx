@@ -2,39 +2,56 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, MapPin, Calendar, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
+import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from "@react-google-maps/api";
+import { useState } from "react";
+
+const center = { lat: 23.5937, lng: 80.9629 }; // Center of India
+
+const cityCoords: Record<string, { lat: number; lng: number }> = {
+  Lucknow: { lat: 26.8467, lng: 80.9462 },
+  Jaipur: { lat: 26.9124, lng: 75.7873 },
+  Kolkata: { lat: 22.5726, lng: 88.3639 },
+};
+
+const cityTrendMap: Record<string, { trend: string }> = {
+  Lucknow: { trend: "Embroidered Dupattas" },
+  Kolkata: { trend: "Cotton Sarees" },
+  Jaipur: { trend: "Block Print Suits" },
+};
 
 const Trends = () => {
+  const [activeCity, setActiveCity] = useState<string | null>(null);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
+  });
+
   const festivals = [
     {
       name: "Diwali",
       category: "Zari Sarees",
       color: "from-orange-500 to-red-500",
-      icon: "🪔"
+      icon: "🪔",
     },
     {
       name: "Eid",
-      category: "White Kurtas", 
+      category: "White Kurtas",
       color: "from-teal-500 to-cyan-500",
-      icon: "🌙"
+      icon: "🌙",
     },
     {
       name: "Navratri",
       category: "Lehenga Choli",
       color: "from-orange-400 to-yellow-500",
-      icon: "👗"
+      icon: "👗",
     },
     {
       name: "Basant",
       category: "Yellow Dupattas",
       color: "from-yellow-400 to-orange-400",
-      icon: "🪁"
-    }
-  ];
-
-  const regionalTrends = [
-    { city: "Lucknow", trend: "Embroidered Dupattas", position: { top: "45%", left: "45%" } },
-    { city: "Kolkata", trend: "Cotton Sarees", position: { top: "55%", left: "60%" } },
-    { city: "Jaipur", trend: "Block Print Suits", position: { top: "50%", left: "35%" } }
+      icon: "🪁",
+    },
   ];
 
   return (
@@ -46,7 +63,7 @@ const Trends = () => {
             <h2 className="text-xl font-bold">GullyKart</h2>
             <p className="text-sm opacity-90">Vision</p>
           </div>
-          
+
           <nav className="space-y-2">
             <Link to="/" className="flex items-center gap-3 p-3 rounded-lg text-white/80 hover:bg-white/10 transition-colors">
               <MapPin size={20} />
@@ -70,7 +87,7 @@ const Trends = () => {
         {/* Main Content */}
         <div className="flex-1 p-8">
           {/* Festival Forecast */}
-          <div className="mb-12">
+          <div id="festival-forecast" className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-3xl font-bold text-foreground">Festival Forecast</h1>
               <div className="flex gap-2">
@@ -78,86 +95,66 @@ const Trends = () => {
                 <div className="w-3 h-3 bg-muted rounded-full"></div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-4 gap-6">
               {festivals.map((festival, index) => (
                 <Card key={index} className={`p-6 bg-gradient-to-br ${festival.color} border-0 text-white`}>
                   <div className="text-3xl mb-4">{festival.icon}</div>
                   <h3 className="text-2xl font-bold mb-2">{festival.name}</h3>
                   <p className="text-white/90 mb-6">{festival.category}</p>
-                 <Link to={`/insights/${festival.name.toLowerCase()}`}>
-  <Button 
-    variant="secondary" 
-    className="w-full bg-white/20 hover:bg-white/30 text-white border-0"
-  >
-    See Insights
-  </Button>
-</Link>
-
+                  <Link to={`/insights/${festival.name.toLowerCase()}`}>
+                    <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 text-white border-0">
+                      See Insights
+                    </Button>
+                  </Link>
                 </Card>
               ))}
             </div>
           </div>
 
-          {/* Regional Trend Heatmap */}
+          {/* Regional Trend Heatmap with Google Maps */}
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-6">Regional Trend Heatmap</h2>
-            
-            <div className="flex gap-12 items-start">
-              {/* Trend List */}
-              <div className="space-y-4">
-                {regionalTrends.map((trend, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <TrendingUp className="text-pink-500" size={20} />
-                    <div>
-                      <div className="font-semibold text-foreground">{trend.city}</div>
-                      <div className="text-muted-foreground">{trend.trend}</div>
-                    </div>
-                  </div>
-                ))}
-                
-                <Button className="mt-6 bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-full">
-                  Sync Catalogue
-                </Button>
-              </div>
 
-              {/* India Map */}
-              <div className="relative flex-1 max-w-md">
-                <div className="relative w-full h-96 bg-gradient-to-br from-pink-400 to-orange-400 rounded-2xl overflow-hidden">
-                  {/* Simplified India map silhouette */}
-                  <svg viewBox="0 0 300 400" className="w-full h-full opacity-80">
-                    <path 
-                      d="M150 50 C200 60, 250 100, 240 200 C230 300, 180 350, 150 360 C120 350, 70 300, 60 200 C50 100, 100 60, 150 50 Z" 
-                      fill="rgba(255,255,255,0.3)"
+            {isLoaded ? (
+              <div className="w-full h-[500px] rounded-xl overflow-hidden">
+                <GoogleMap
+                  zoom={5}
+                  center={center}
+                  mapContainerStyle={{ width: "100%", height: "100%" }}
+                >
+                  {Object.entries(cityCoords).map(([city, coords]) => (
+                    <Marker
+                      key={city}
+                      position={coords}
+                      onClick={() => setActiveCity(city)}
                     />
-                  </svg>
-                  
-                  {/* Trend markers */}
-                  {regionalTrends.map((trend, index) => (
-                    <div 
-                      key={index}
-                      className="absolute w-4 h-4 bg-white rounded-full border-4 border-pink-300"
-                      style={trend.position}
-                    ></div>
                   ))}
-                </div>
-                
-                <div className="mt-6 text-center">
-                  <p className="text-muted-foreground">Auto-match your products with top trends.</p>
-                </div>
-              </div>
 
-              {/* Right side trend info */}
-              <div className="space-y-6">
-                <div>
-                  <div className="font-semibold text-foreground">Lucknow</div>
-                  <div className="text-muted-foreground">Embroidered Dupattas</div>
-                </div>
-                <div>
-                  <div className="font-semibold text-foreground">Jaipur</div>
-                  <div className="text-muted-foreground">Block Print Suits</div>
-                </div>
+                  {activeCity && (
+                    <InfoWindow
+                      position={cityCoords[activeCity]}
+                      onCloseClick={() => setActiveCity(null)}
+                    >
+                      <div>
+                        <h3 className="font-semibold">{activeCity}</h3>
+                        <p>{cityTrendMap[activeCity].trend}</p>
+                      </div>
+                    </InfoWindow>
+                  )}
+                </GoogleMap>
               </div>
+            ) : (
+              <p>Loading map...</p>
+            )}
+
+            <div className="mt-6">
+              <Button
+                className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-full"
+                onClick={() => toast({ title: "Catalogue synced!", description: "Matching your products to trending styles..." })}
+              >
+                Sync Catalogue
+              </Button>
             </div>
           </div>
         </div>
