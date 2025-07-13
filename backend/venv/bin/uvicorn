@@ -1,4 +1,4 @@
-#!/Users/ishavashisht/gullykart/gullykart-trend-spark/backend/venv/bin/python3.11
+#!/home/sherlock/Downloads/gullykart/backend/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
