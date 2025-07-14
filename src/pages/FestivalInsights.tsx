@@ -16,7 +16,7 @@ interface Product {
   seller_name: string;
 }
 
-const FestivalInsightPage = () => {
+const FestivalInsights = () => {
   const { festival } = useParams<{ festival: string }>();
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
@@ -53,12 +53,6 @@ const FestivalInsightPage = () => {
       emoji: '🌕',
       description: 'Traditional elegance for your special occasion',
       color: 'from-red-400 to-pink-500'
-    },
-    basant: {
-      title: 'Basant Panchami Collection',
-      emoji: '🌻',
-      description: 'Welcome spring with our vibrant yellow collection',
-      color: 'from-yellow-400 to-orange-400'
     },
   };
 
@@ -260,5 +254,4 @@ const FestivalInsightPage = () => {
   );
 };
 
-export default FestivalInsightPage;
-
+export default FestivalInsights;

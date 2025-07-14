@@ -9,18 +9,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
-const Login = () => {
+const SignupNew = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('email');
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     phone: '',
     password: '',
+    confirmPassword: ''
   });
-  
-  const navigate = useNavigate();
-  const { login, sendOTP, verifyOTP } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -29,37 +31,69 @@ const Login = () => {
     }));
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    if (!formData.username.trim()) {
+      toast.error('Username is required');
+      return;
+    }
+
+    if (activeTab === 'email' && !formData.email.trim()) {
+      toast.error('Email is required');
+      return;
+    }
+
+    if (activeTab === 'phone' && !formData.phone.trim()) {
+      toast.error('Phone number is required');
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      const identifier = activeTab === 'email' ? formData.email : formData.phone;
-      const result = await login(identifier, formData.password);
+      const userData = {
+        username: formData.username.trim(),
+        email: activeTab === 'email' ? formData.email.trim() : formData.phone.trim() + '@phone.local',
+        password: formData.password,
+        ...(activeTab === 'phone' && { phone: formData.phone.trim() })
+      };
+
+      const result = await register(userData);
       
       if (result.success) {
-        toast.success('Login successful! Welcome back.');
+        toast.success('Registration successful! Welcome to GullyKart!');
         navigate('/dashboard');
       } else {
         toast.error(result.message);
       }
     } catch (error) {
-      toast.error('Login failed. Please try again.');
+      console.error('Registration error:', error);
+      toast.error('Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignup = async () => {
     setIsLoading(true);
     try {
-      // TODO: Implement Google OAuth integration
+      // TODO: Implement Google OAuth registration
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success('Google login successful! Welcome back.');
+      toast.success('Google signup successful! Welcome to GullyKart!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Google login failed. Please try again.');
+      toast.error('Google signup failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -77,10 +111,10 @@ const Login = () => {
         <Card className="backdrop-blur-sm bg-card/95 border-primary-foreground/10">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Welcome to GullyKart Vision
+              Join GullyKart Vision
             </CardTitle>
             <CardDescription>
-              Sign in to access your seller dashboard
+              Create your seller account to get started
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -97,14 +131,27 @@ const Login = () => {
               </TabsList>
 
               <TabsContent value="email" className="space-y-4">
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email or Username</Label>
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      type="text"
+                      placeholder="Choose a username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-background/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       name="email"
-                      type="text"
-                      placeholder="seller@example.com or username"
+                      type="email"
+                      placeholder="seller@example.com"
                       value={formData.email}
                       onChange={handleInputChange}
                       required
@@ -118,7 +165,7 @@ const Login = () => {
                         id="password"
                         name="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                        placeholder="Create a strong password"
                         value={formData.password}
                         onChange={handleInputChange}
                         required
@@ -139,18 +186,59 @@ const Login = () => {
                       </Button>
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirm your password"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        required
+                        className="bg-background/50 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                   <Button 
                     type="submit" 
                     className="w-full" 
                     disabled={isLoading}
                   >
-                    {isLoading ? "Signing in..." : "Sign in with Email"}
+                    {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
               </TabsContent>
 
               <TabsContent value="phone" className="space-y-4">
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username-phone">Username</Label>
+                    <Input
+                      id="username-phone"
+                      name="username"
+                      type="text"
+                      placeholder="Choose a username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-background/50"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
@@ -165,13 +253,13 @@ const Login = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone-password">Password</Label>
+                    <Label htmlFor="password-phone">Password</Label>
                     <div className="relative">
                       <Input
-                        id="phone-password"
+                        id="password-phone"
                         name="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                        placeholder="Create a strong password"
                         value={formData.password}
                         onChange={handleInputChange}
                         required
@@ -192,12 +280,40 @@ const Login = () => {
                       </Button>
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword-phone">Confirm Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword-phone"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirm your password"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        required
+                        className="bg-background/50 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                   <Button 
                     type="submit" 
                     className="w-full" 
                     disabled={isLoading}
                   >
-                    {isLoading ? "Signing in..." : "Sign in with Phone"}
+                    {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
               </TabsContent>
@@ -219,7 +335,7 @@ const Login = () => {
                 variant="outline"
                 className="w-full bg-background/50 hover:bg-accent"
                 type="button"
-                onClick={handleGoogleLogin}
+                onClick={handleGoogleSignup}
                 disabled={isLoading}
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -240,13 +356,13 @@ const Login = () => {
                     fill="#EA4335"
                   />
                 </svg>
-                {isLoading ? "Signing in..." : "Sign in with Google"}
+                {isLoading ? "Signing up..." : "Sign up with Google"}
               </Button>
 
               <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <Link to="/signup" className="text-primary hover:underline font-medium">
-                  Sign up
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary hover:underline font-medium">
+                  Sign in
                 </Link>
               </div>
             </div>
@@ -257,4 +373,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignupNew;
